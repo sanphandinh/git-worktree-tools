@@ -1,0 +1,65 @@
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
+  "agents": {
+    "sisyphus": {
+      "model": "opencode/kimi-k2.5-free"
+    },
+    "oracle": {
+      "model": "opencode/kimi-k2.5-free",
+      "variant": "high"
+    },
+    "librarian": {
+      "model": "zai-coding-plan/glm-4.7"
+    },
+    "explore": {
+      "model": "opencode/minimax-m2.1-free"
+    },
+    "multimodal-looker": {
+      "model": "opencode/kimi-k2.5-free"
+    },
+    "prometheus": {
+      "model": "opencode/kimi-k2.5-free",
+      "variant": "max"
+    },
+    "metis": {
+      "model": "opencode/kimi-k2.5-free",
+      "variant": "max"
+    },
+    "momus": {
+      "model": "opencode/kimi-k2.5-free",
+      "variant": "medium"
+    },
+    "atlas": {
+      "model": "opencode/kimi-k2.5-free"
+    }
+  },
+  "categories": {
+    "visual-engineering": {
+      "model": "google/gemini-3-pro-preview"
+    },
+    "ultrabrain": {
+      "model": "opencode/kimi-k2.5-free",
+      "variant": "xhigh"
+    },
+    "artistry": {
+      "model": "google/gemini-3-pro-preview",
+      "variant": "max"
+    },
+    "quick": {
+      "model": "opencode/kimi-k2.5-free"
+    },
+    "unspecified-low": {
+      "model": "github-copilot/claude-sonnet-4.5"
+    },
+    "unspecified-high": {
+      "model": "github-copilot/claude-sonnet-4.5"
+    },
+    "writing": {
+      "model": "google/gemini-3-flash"
+    },
+    "deep": {
+      "model": "github-copilot/gpt-5.2-codex",
+      "variant": "medium"
+    }
+  }
+}

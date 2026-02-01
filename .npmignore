@@ -1,0 +1,10 @@
+src/
+tests/
+dist/
+.git/
+.gitignore
+*.test.ts
+*.spec.ts
+tsconfig.json
+.github/
+.vscode/
