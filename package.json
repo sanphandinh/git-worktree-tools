@@ -1,5 +1,5 @@
 {
-  "name": "wt",
+  "name": "wtre",
   "version": "0.1.0",
   "type": "module",
   "description": "Simple but powerful CLI for managing git worktrees with AI agent collaboration support",
