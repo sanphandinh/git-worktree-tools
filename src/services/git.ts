@@ -24,7 +24,8 @@ export class GitService {
   }
 
   async getRootPath(): Promise<string> {
-    return this.execGit(['rev-parse', '--show-toplevel']);
+    const rootPath = await this.execGit(['rev-parse', '--show-toplevel']);
+    return rootPath.trim();
   }
 
   async getWorktrees(): Promise<WorktreeInfo[]> {

@@ -24,10 +24,12 @@ export async function createCommand(
   const rootPath = await git.getRootPath();
 
   let worktreePath: string;
+  const parentDir = dirname(rootPath);
+
   if (pathArg) {
-    worktreePath = resolve(pathArg);
+    // Resolve relative paths from parentDir, absolute paths stay as-is
+    worktreePath = resolve(parentDir, pathArg);
   } else {
-    const parentDir = dirname(rootPath);
     const timestamp = Date.now().toString(36);
     const suggestedName = options.branch || `wt-${timestamp}`;
     worktreePath = join(parentDir, suggestedName);
@@ -58,12 +60,39 @@ export async function createCommand(
   await mkdir(dirname(worktreePath), { recursive: true });
 
   logger.info(`Creating worktree at ${worktreePath}...`);
-  
+
   const branchExists = await git.branchExists(branch);
-  if (branchExists) {
-    await git.createWorktree(worktreePath, branch);
-  } else {
-    await git.createWorktree(worktreePath, branch, baseBranch);
+  try {
+    if (branchExists) {
+      await git.createWorktree(worktreePath, branch);
+    } else {
+      await git.createWorktree(worktreePath, branch, baseBranch);
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    const worktreeInUseMatch = errorMessage.match(/'([^']+)' is already used by worktree at '([^']+)'/);
+    if (worktreeInUseMatch) {
+      const [, usedBranch, existingWorktreePath] = worktreeInUseMatch;
+      logger.error(`Cannot create worktree: branch '${usedBranch}' is already in use`);
+      console.log();
+      console.log(chalk.yellow('The branch is currently checked out in another worktree:'));
+      console.log(`  ${existingWorktreePath}`);
+      console.log();
+      console.log(chalk.cyan('Options to resolve this:'));
+      console.log(`  1. Use a different branch name:`);
+      console.log(`     ${chalk.bold(`wt create ${pathArg || 'my-worktree'} --branch <new-branch-name>`)}`);
+      console.log();
+      console.log(`  2. Remove the existing worktree first:`);
+      console.log(`     ${chalk.bold(`wt delete ${existingWorktreePath}`)}`);
+      console.log();
+      console.log(`  3. Switch to the existing worktree:`);
+      console.log(`     ${chalk.bold(`cd ${existingWorktreePath}`)}`);
+      console.log();
+      process.exit(1);
+    }
+
+    throw error;
   }
 
   logger.success(`Worktree created: ${branch}`);
