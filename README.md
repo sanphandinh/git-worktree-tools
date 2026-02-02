@@ -4,6 +4,7 @@ A simple but powerful CLI tool for managing git worktrees with AI agent collabor
 
 ## Features
 
+- **Smart Naming** - Auto-derives folder/branch names from each other
 - **Simple CLI** - Clean, git-like interface
 - **Auto-Setup** - Automatically installs dependencies and copies env files
 - **Package Manager Detection** - Supports npm, yarn, pnpm, and bun
@@ -61,11 +62,20 @@ npx wt create my-feature
 # List all worktrees
 wt list
 
-# Create a new worktree from main
+# Create a new worktree (interactive mode)
+wt create
+
+# Create with folder name, derive branch from it
+wt create feature-auth
+
+# Create with branch name, derive folder from it
+wt create -b feature/auth
+
+# Create with both specified
 wt create feature-auth --branch feature/auth
 
-# Create worktree with auto-detected name
-wt create
+# Create from a different base branch
+wt create -B develop
 
 # Check detailed status
 wt status feature-auth
@@ -123,14 +133,103 @@ wt list --porcelain        # Machine-readable output
 
 ### `wt create [path]`
 
-Create a new worktree.
+Create a new worktree with smart name derivation.
+
+#### Usage Patterns
+
+**1. Interactive Mode (neither folder nor branch specified)**
+```bash
+wt create
+# Prompts for folder name and branch name
+```
+
+**2. Path Only (derive branch from folder name)**
+```bash
+wt create feature-auth
+# Creates folder: feature-auth
+# Creates branch: feature/auth (derived from folder name)
+```
+
+**3. Branch Only (derive folder from branch name)**
+```bash
+wt create -b feature/auth
+# Creates folder: feature-auth (derived from branch name)
+# Creates branch: feature/auth
+```
+
+**4. Both Specified (use as-is)**
+```bash
+wt create my-folder --branch feature/auth
+# Creates folder: my-folder
+# Creates branch: feature/auth
+```
+
+#### Options
 
 ```bash
-wt create feature-auth                    # Create from main
-wt create -b feature/auth                 # Create with specific branch
-wt create -B develop                      # Create from develop branch
-wt create --no-install                    # Skip dependency installation
-wt create --dry-run                       # Preview what would be done
+wt create [path] [options]
+
+Options:
+  -b, --branch <name>       Branch name (creates if doesn't exist)
+  -B, --branch-from <name>  Base branch to create from (default: main)
+  --no-install             Skip dependency installation
+  --no-hooks               Skip post-create hooks
+  --dry-run                Preview what would be done without executing
+```
+
+#### Examples
+
+```bash
+# Create from main with auto-derived names
+wt create fix-login-bug
+
+# Create from develop branch with specific branch name
+wt create -b feature/new-api -B develop
+
+# Dry run to preview what would be created
+wt create feature-auth --dry-run
+
+# Skip auto-setup
+wt create feature-auth --no-install --no-hooks
+```
+
+#### Smart Name Conversion
+
+When deriving names, `wt` automatically converts between folder and branch formats:
+
+| Folder Name | Derived Branch |
+|-------------|----------------|
+| `feature-auth` | `feature/auth` |
+| `fix-bug-123` | `fix/bug-123` |
+| `release-v1.0.0` | `release/v1.0.0` |
+| `main` | `main` |
+
+| Branch Name | Derived Folder |
+|-------------|----------------|
+| `feature/auth` | `feature-auth` |
+| `hotfix/urgent` | `hotfix-urgent` |
+| `release/v1.0.0` | `release-v1.0.0` |
+| `main` | `main` |
+
+#### Validation & Error Handling
+
+The `create` command validates inputs before executing:
+
+```bash
+# Error: Branch already exists
+$ wt create feature-auth
+✗ Branch "feature/auth" already exists locally
+Suggestion: Use "wt create feature-auth feature/auth" to create a worktree from existing branch
+
+# Error: Path already exists
+$ wt create existing-folder
+✗ Path already exists: /path/to/existing-folder
+Suggestion: Choose a different name or remove the existing directory
+
+# Error: Worktree already exists at path
+$ wt create ../existing-worktree
+✗ A worktree already exists at "/path/to/existing-worktree"
+Suggestion: Choose a different path or remove the existing worktree first with "wt delete <path>"
 ```
 
 ### `wt delete <path>`
@@ -203,13 +302,13 @@ Example hook:
 Run multiple AI agents on different branches simultaneously:
 
 ```bash
-# Agent 1: Feature development
-wt create feature-auth --branch feature/auth
+# Agent 1: Feature development (just folder name - branch derived)
+wt create feature-auth
 
-# Agent 2: Bug fix  
-wt create fix-login --branch fix/login-bug
+# Agent 2: Bug fix (just branch name - folder derived)
+wt create -b fix/login-bug
 
-# Agent 3: Code review
+# Agent 3: Code review (both specified)
 wt create review-pr-123 --branch pr-123
 ```
 

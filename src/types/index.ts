@@ -77,3 +77,39 @@ export interface HookContext {
   mainPath: string;
   createdAt?: string;
 }
+
+/**
+ * Response from interactive prompts when user needs to provide missing information
+ */
+export interface PromptResponse {
+  folderName: string;
+  branchName: string;
+  confirmed: boolean;
+}
+
+/**
+ * Result from pre-flight validation checks before creating a worktree
+ */
+export interface CreateValidationResult {
+  valid: boolean;
+  error?: string;
+  suggestion?: string;
+  existingWorktrees?: string[];
+  existingBranches?: string[];
+}
+
+/**
+ * The 4 possible creation scenarios based on what user provided
+ */
+export type CreateScenario = 'both-provided' | 'path-only' | 'branch-only' | 'neither';
+
+/**
+ * Planned creation parameters after analyzing inputs and prompts
+ */
+export interface CreatePlan {
+  scenario: CreateScenario;
+  folderName: string;
+  branchName: string;
+  baseBranch: string;
+  derivedFrom: 'path' | 'branch' | 'prompt';
+}
