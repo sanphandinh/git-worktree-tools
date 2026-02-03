@@ -45,19 +45,19 @@ export function cli(): void {
 
   program
     .command('status [path]')
-    .description('Show detailed worktree status')
+    .description('Show detailed worktree status by path or branch name')
     .action(statusCommand);
 
   program
     .command('sync [path]')
-    .description('Sync worktree with base branch')
+    .description('Sync worktree with base branch by path or branch name')
     .option('-m, --merge', 'Use merge instead of rebase')
     .option('--no-fetch', 'Skip fetching remote')
     .action(syncCommand);
 
   program
     .command('archive <path>')
-    .description('Archive a worktree')
+    .description('Archive a worktree by path or branch name')
     .option('-o, --output <path>', 'Custom archive path')
     .action(archiveCommand);
 

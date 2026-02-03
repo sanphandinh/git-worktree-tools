@@ -4,6 +4,7 @@ import { GitService } from '../services/git.js';
 import { loadConfig } from '../services/config.js';
 import { logger } from '../utils/logger.js';
 import { pathExists } from '../utils/validation.js';
+import { findWorktreeByBranch, findWorktreeByPath } from '../utils/worktree-lookup.js';
 import chalk from 'chalk';
 
 export async function syncCommand(
@@ -18,15 +19,28 @@ export async function syncCommand(
   }
 
   const config = await loadConfig();
-  const worktreePath = pathArg ? resolve(pathArg) : process.cwd();
-  
+  const worktrees = await git.getWorktrees();
+
+  let worktreePath: string;
+
+  if (!pathArg) {
+    worktreePath = process.cwd();
+  } else {
+    const branchMatch = findWorktreeByBranch(worktrees, pathArg);
+    if (branchMatch) {
+      worktreePath = branchMatch.path;
+      logger.info(`Found worktree for branch "${pathArg}": ${worktreePath}`);
+    } else {
+      worktreePath = resolve(pathArg);
+    }
+  }
+
   if (!await pathExists(worktreePath)) {
     logger.error(`Path not found: ${worktreePath}`);
     process.exit(1);
   }
 
-  const worktrees = await git.getWorktrees();
-  const targetWorktree = worktrees.find(w => w.path === worktreePath);
+  const targetWorktree = worktrees.find(w => w.path === worktreePath) || findWorktreeByPath(worktrees, worktreePath);
 
   if (!targetWorktree) {
     logger.error(`Not a valid worktree: ${worktreePath}`);

@@ -9,6 +9,7 @@ import { GitService } from '../services/git.js';
 import { expandHome } from '../utils/paths.js';
 import { logger } from '../utils/logger.js';
 import { pathExists, isDirectory } from '../utils/validation.js';
+import { findWorktreeByBranch, findWorktreeByPath } from '../utils/worktree-lookup.js';
 import chalk from 'chalk';
 import tar from 'tar-stream';
 
@@ -23,26 +24,42 @@ export async function archiveCommand(
     process.exit(1);
   }
 
-  const worktreePath = resolve(pathArg);
-  
+  const worktrees = await git.getWorktrees();
+
+  let worktreePath: string;
+
+  const branchMatch = findWorktreeByBranch(worktrees, pathArg);
+  if (branchMatch) {
+    worktreePath = branchMatch.path;
+    logger.info(`Found worktree for branch "${pathArg}": ${worktreePath}`);
+  } else {
+    worktreePath = resolve(pathArg);
+  }
+
   if (!await pathExists(worktreePath) || !await isDirectory(worktreePath)) {
     logger.error(`Worktree not found: ${worktreePath}`);
+    process.exit(1);
+  }
+
+  const targetWorktree = worktrees.find(w => w.path === worktreePath) || findWorktreeByPath(worktrees, worktreePath);
+  if (!targetWorktree) {
+    logger.error(`Not a valid worktree: ${worktreePath}`);
     process.exit(1);
   }
 
   const config = await loadConfig();
   const { branch, head } = await git.getBranchInfo(worktreePath);
   const worktreeName = worktreePath.split('/').pop() || 'worktree';
-  
+
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
   const archiveName = `${worktreeName}-${timestamp}.tar.gz`;
-  
-  const archiveDir = options.output 
+
+  const archiveDir = options.output
     ? dirname(options.output)
     : expandHome(config.archive?.directory || '~/.worktree-archives');
-  
+
   await mkdir(archiveDir, { recursive: true });
-  
+
   const archivePath = options.output || join(archiveDir, archiveName);
 
   logger.info(`Archiving ${worktreeName}...`);

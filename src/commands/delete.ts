@@ -6,6 +6,7 @@ import { executeHooks } from '../services/hooks.js';
 import { archiveCommand } from './archive.js';
 import { logger } from '../utils/logger.js';
 import { pathExists } from '../utils/validation.js';
+import { findWorktreeByBranch, findWorktreeByPath } from '../utils/worktree-lookup.js';
 import chalk from 'chalk';
 import readline from 'readline';
 
@@ -24,45 +25,6 @@ function prompt(question: string): Promise<string> {
 
 /**
  * Find a worktree by its branch name
- */
-function normalizeBranchName(branch: string): string {
-  return branch.replace(/^refs\/heads\//, '');
-}
-
-function findWorktreeByBranch(worktrees: WorktreeInfo[], branchName: string): WorktreeInfo | undefined {
-  const normalizedInput = normalizeBranchName(branchName);
-
-  let match = worktrees.find(w => normalizeBranchName(w.branch) === normalizedInput);
-  if (match) return match;
-
-  match = worktrees.find(w => normalizeBranchName(w.branch).toLowerCase() === normalizedInput.toLowerCase());
-  if (match) return match;
-
-  return undefined;
-}
-
-/**
- * Find a worktree by its path (exact or resolved)
- */
-function findWorktreeByPath(worktrees: WorktreeInfo[], inputPath: string): WorktreeInfo | undefined {
-  const resolvedPath = resolve(inputPath);
-
-  // Try exact match first
-  let match = worktrees.find(w => w.path === inputPath || w.path === resolvedPath);
-  if (match) return match;
-
-  // Try matching the folder name only
-  const folderName = inputPath.split('/').pop() || inputPath;
-  match = worktrees.find(w => {
-    const worktreeFolder = w.path.split('/').pop() || '';
-    return worktreeFolder === folderName;
-  });
-
-  return match;
-}
-
-/**
- * Display worktrees in a numbered list and prompt user to select one
  */
 async function promptForWorktreeSelection(worktrees: WorktreeInfo[]): Promise<WorktreeInfo | null> {
   if (worktrees.length === 0) {
@@ -105,31 +67,6 @@ async function promptForWorktreeSelection(worktrees: WorktreeInfo[]): Promise<Wo
   }
 
   return deletableWorktrees[selection - 1];
-}
-
-/**
- * Determine if input looks like a branch name vs a path
- * Branches typically don't start with /, ., or ~
- * Paths often contain / or start with special characters
- */
-function looksLikeBranchName(input: string): boolean {
-  // If it starts with these, it's probably a path
-  if (input.startsWith('/') || input.startsWith('./') || input.startsWith('../') || input.startsWith('~')) {
-    return false;
-  }
-
-  // If it contains path separators, it's likely a path
-  if (input.includes('/') && !input.includes(' ')) {
-    // But feature/branch-name style branches also contain /
-    // Check if it looks like a typical branch pattern
-    const commonBranchPatterns = /^(feature|fix|bugfix|hotfix|release|develop|main|master)\//;
-    if (commonBranchPatterns.test(input)) {
-      return true;
-    }
-  }
-
-  // Simple names without slashes are likely branches
-  return !input.includes('/');
 }
 
 export async function deleteCommand(

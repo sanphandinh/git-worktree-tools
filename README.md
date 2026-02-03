@@ -6,6 +6,7 @@ A simple but powerful CLI tool for managing git worktrees with AI agent collabor
 
 - **Smart Naming** - Auto-derives folder/branch names from each other
 - **Simple CLI** - Clean, git-like interface
+- **Branch-Based Operations** - Reference worktrees by branch name (e.g., `wt status feature/auth`)
 - **Auto-Setup** - Automatically installs dependencies and copies env files
 - **Package Manager Detection** - Supports npm, yarn, pnpm, and bun
 - **Lifecycle Hooks** - Run custom scripts on create/delete
@@ -77,11 +78,17 @@ wt create feature-auth --branch feature/auth
 # Create from a different base branch
 wt create -B develop
 
-# Check detailed status
-wt status feature-auth
+# Check detailed status (by folder or branch name)
+wt status feature-auth                # By folder name
+wt status feature/auth                # By branch name
 
-# Sync worktree with main
-wt sync feature-auth
+# Sync worktree with main (by folder or branch name)
+wt sync feature-auth                  # By folder name
+wt sync feature/auth                  # By branch name
+
+# Archive worktree (by folder or branch name)
+wt archive feature-auth               # By folder name
+wt archive feature/auth               # By branch name
 
 # Delete worktree (by folder name, branch name, or interactively)
 wt delete feature-auth                # Delete by folder name
@@ -309,34 +316,39 @@ The command automatically determines whether your input is a **branch name** or 
 | Simple name without `/` | Branch | `main`, `develop` |
 | Folder-style names with `-` | Path | `feature-auth` → folder name |
 
-If the input matches a branch name, the worktree checked out to that branch will be deleted. If no branch match is found, it's treated as a path.
+If the input matches a branch name, the worktree checked out to that branch will be selected. If no branch match is found, it's treated as a path.
+
+> **Note:** This branch-vs-path detection pattern applies to all commands that accept a worktree identifier: `delete`, `status`, `sync`, and `archive`.
 
 ### `wt status [path]`
 
-Show detailed status of a worktree.
+Show detailed status of a worktree. You can specify the worktree by **folder name** or **branch name**.
 
 ```bash
 wt status                                 # Status of current directory
-wt status feature-auth                    # Status of specific worktree
+wt status feature-auth                    # Status by folder name
+wt status feature/auth                    # Status by branch name
 ```
 
 ### `wt sync [path]`
 
-Sync worktree with base branch.
+Sync worktree with base branch. You can specify the worktree by **folder name** or **branch name**.
 
 ```bash
 wt sync                                   # Sync current worktree
-wt sync feature-auth                      # Sync specific worktree
+wt sync feature-auth                      # Sync by folder name
+wt sync feature/auth                      # Sync by branch name
 wt sync --merge                           # Use merge instead of rebase
 wt sync --no-fetch                        # Skip fetching remote
 ```
 
 ### `wt archive <path>`
 
-Archive a worktree.
+Archive a worktree. You can specify the worktree by **folder name** or **branch name**.
 
 ```bash
-wt archive feature-auth                   # Archive to default location
+wt archive feature-auth                   # Archive by folder name
+wt archive feature/auth                   # Archive by branch name
 wt archive feature-auth -o backup.tar.gz  # Custom output path
 ```
 
