@@ -34,6 +34,14 @@
   ],
   "author": "",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sanphandinh/git-worktree-tools.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sanphandinh/git-worktree-tools/issues"
+  },
+  "homepage": "https://github.com/sanphandinh/git-worktree-tools#readme",
   "engines": {
     "node": ">=18.0.0"
   },
