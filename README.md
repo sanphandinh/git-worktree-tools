@@ -20,13 +20,13 @@ A simple but powerful CLI tool for managing git worktrees with AI agent collabor
 ### Global Installation
 
 ```bash
-npm install -g wt
+npm install -g @sanphandinh/wtre
 # or
-yarn global add wt
+yarn global add @sanphandinh/wtre
 # or
-pnpm add -g wt
+pnpm add -g @sanphandinh/wtre
 # or
-bun add -g wt
+bun add -g @sanphandinh/wtre
 ```
 
 Then use `wt` anywhere:
@@ -39,9 +39,9 @@ wt list
 ### Project-Local Installation
 
 ```bash
-npm install --save-dev wt
+npm install --save-dev @sanphandinh/wtre
 # or
-yarn add -D wt
+yarn add -D @sanphandinh/wtre
 ```
 
 Use via npx:
@@ -54,8 +54,8 @@ npx wt create feature-branch
 ### One-time Usage (no install)
 
 ```bash
-npx wt list
-npx wt create my-feature
+npx @sanphandinh/wtre list
+npx @sanphandinh/wtre create my-feature
 ```
 
 ## Quick Start
