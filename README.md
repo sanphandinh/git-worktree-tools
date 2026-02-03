@@ -4,6 +4,7 @@ A simple but powerful CLI tool for managing git worktrees with AI agent collabor
 
 ## Features
 
+- **Interactive Init** - Auto-detect and generate config with `wt init`
 - **Smart Naming** - Auto-derives folder/branch names from each other
 - **Simple CLI** - Clean, git-like interface
 - **Branch-Based Operations** - Reference worktrees by branch name (e.g., `wt status feature/auth`)
@@ -60,6 +61,9 @@ npx wt create my-feature
 ## Quick Start
 
 ```bash
+# Initialize configuration for your project
+wt init
+
 # List all worktrees
 wt list
 
@@ -101,7 +105,19 @@ wt delete feature-auth --archive
 
 ## Configuration
 
-Create a `.wtconfig.json` file in your project root:
+### Quick Setup with `wt init`
+
+The easiest way to create a configuration file is using the interactive init command:
+
+```bash
+wt init
+```
+
+This will guide you through setting up your `.wtconfig.json` with auto-detected values.
+
+### Manual Configuration
+
+You can also create a `.wtconfig.json` file manually in your project root:
 
 ```json
 {
@@ -334,6 +350,81 @@ The command automatically determines whether your input is a **branch name** or 
 If the input matches a branch name, the worktree checked out to that branch will be selected. If no branch match is found, it's treated as a path.
 
 > **Note:** This branch-vs-path detection pattern applies to all commands that accept a worktree identifier: `delete`, `status`, `sync`, and `archive`.
+
+### `wt init`
+
+Initialize a `.wtconfig.json` configuration file for your project with interactive prompts.
+
+```bash
+wt init
+```
+
+This command will:
+1. Check if you're in a git repository
+2. Auto-detect your default branch (from `origin/HEAD` or main/master)
+3. Find environment example files (.env.example, .env.local.example, etc.)
+4. Interactively prompt you for:
+   - Default base branch
+   - Auto-install dependencies setting
+   - Auto-copy environment files setting
+   - Archive directory location
+   - Lifecycle hooks setup (optional)
+
+#### Auto-Detection
+
+The `init` command automatically detects and suggests:
+
+| Setting | Detection Method |
+|---------|-----------------|
+| `defaultBranch` | From `origin/HEAD` or checks for main/master branches |
+| `copyFiles` | Scans for .env.example, .env.local.example, .env.sample, etc. |
+| `autoInstall` | Checks for package.json presence |
+
+#### Example Output
+
+```bash
+$ wt init
+
+🌳 Worktree Configuration Setup
+Answer the following questions to generate your .wtconfig.json
+
+Default base branch [main]:
+Auto-install dependencies when creating worktrees? [Y/n]: y
+Auto-copy environment files to new worktrees? [Y/n]: y
+  Detected env files: .env.example
+  Additional files to copy (comma-separated, optional):
+Archive directory [~/.worktree-archives]:
+Setup lifecycle hooks? [y/N]: n
+
+✓ Configuration file created successfully!
+  Path: /path/to/your/project/.wtconfig.json
+
+Generated configuration:
+{
+  "defaultBranch": "main",
+  "autoCopy": true,
+  "copyFiles": [".env.example"]
+}
+
+You can edit this file anytime to customize your worktree settings.
+```
+
+#### Protection Against Overwrites
+
+If `.wtconfig.json` already exists, the command will warn you and exit:
+
+```bash
+$ wt init
+
+⚠️  Configuration file already exists:
+   /path/to/your/project/.wtconfig.json
+
+Options:
+  1. Backup and create new: wt init --force
+  2. Edit existing file manually
+
+Use --force to overwrite the existing configuration.
+```
 
 ### `wt status [path]`
 

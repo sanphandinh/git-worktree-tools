@@ -6,6 +6,7 @@ import { deleteCommand } from './commands/delete.js';
 import { statusCommand } from './commands/status.js';
 import { syncCommand } from './commands/sync.js';
 import { archiveCommand } from './commands/archive.js';
+import { initCommand } from './commands/init.js';
 
 export function cli(): void {
   const program = new Command();
@@ -60,6 +61,11 @@ export function cli(): void {
     .description('Archive a worktree by path or branch name')
     .option('-o, --output <path>', 'Custom archive path')
     .action(archiveCommand);
+
+  program
+    .command('init')
+    .description('Initialize worktree configuration for this project')
+    .action(initCommand);
 
   program.parse();
 }

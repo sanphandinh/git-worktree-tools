@@ -1,0 +1,12 @@
+{
+  "defaultBranch": "main",
+  "autoCopy": true,
+  "copyFiles": [
+    ".env"
+  ],
+  "hooks": {
+    "postCreate": [
+      "bun install"
+    ]
+  }
+}
