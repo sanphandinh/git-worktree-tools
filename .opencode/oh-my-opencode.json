@@ -2,10 +2,10 @@
   "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
   "agents": {
     "sisyphus": {
-      "model": "opencode/kimi-k2.5-free"
+      "model": "github-copilot/claude-sonnet-4.5"
     },
     "oracle": {
-      "model": "opencode/kimi-k2.5-free",
+      "model": "github-copilot/claude-opus-4.5",
       "variant": "high"
     },
     "librarian": {
@@ -15,10 +15,10 @@
       "model": "opencode/minimax-m2.1-free"
     },
     "multimodal-looker": {
-      "model": "opencode/kimi-k2.5-free"
+      "model": "zai-coding-plan/glm-4.7"
     },
     "prometheus": {
-      "model": "opencode/kimi-k2.5-free",
+      "model": "github-copilot/claude-opus-4.5",
       "variant": "max"
     },
     "metis": {
@@ -38,7 +38,7 @@
       "model": "google/gemini-3-pro-preview"
     },
     "ultrabrain": {
-      "model": "opencode/kimi-k2.5-free",
+      "model": "github-copilot/claude-opus-4.5",
       "variant": "xhigh"
     },
     "artistry": {
@@ -46,7 +46,7 @@
       "variant": "max"
     },
     "quick": {
-      "model": "opencode/kimi-k2.5-free"
+      "model": "github-copilot/gpt-5.2-codex"
     },
     "unspecified-low": {
       "model": "github-copilot/claude-sonnet-4.5"

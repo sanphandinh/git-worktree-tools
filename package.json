@@ -1,12 +1,12 @@
 {
-  "name": "wtre",
+  "name": "@sanphandinh/wtre",
   "version": "0.1.0",
   "type": "module",
   "description": "Simple but powerful CLI for managing git worktrees with AI agent collaboration support",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "wt": "./bin/wt.js"
+    "wt": "bin/wt.js"
   },
   "files": [
     "dist/",
