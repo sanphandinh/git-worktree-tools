@@ -83,6 +83,11 @@ wt status feature-auth
 # Sync worktree with main
 wt sync feature-auth
 
+# Delete worktree (by folder name, branch name, or interactively)
+wt delete feature-auth                # Delete by folder name
+wt delete feature/auth                # Delete by branch name
+wt delete                             # Interactive mode - select from list
+
 # Archive and delete
 wt delete feature-auth --archive
 ```
@@ -229,18 +234,82 @@ Suggestion: Choose a different name or remove the existing directory
 # Error: Worktree already exists at path
 $ wt create ../existing-worktree
 ✗ A worktree already exists at "/path/to/existing-worktree"
-Suggestion: Choose a different path or remove the existing worktree first with "wt delete <path>"
+Suggestion: Choose a different path or remove the existing worktree first with "wt delete [path]"
 ```
 
-### `wt delete <path>`
+### `wt delete [path]`
 
-Remove a worktree safely.
+Remove a worktree safely. You can specify the worktree by **folder name**, **branch name**, or use **interactive mode** to select from a list.
+
+#### Usage Patterns
+
+**1. Interactive Mode (no argument)**
+```bash
+wt delete
+# Shows numbered list of all worktrees
+# Enter number to select which worktree to delete
+```
+
+**2. Delete by Folder Name**
+```bash
+wt delete feature-auth                    # Delete worktree by folder name
+wt delete ../my-project/feature-auth      # Delete by full/relative path
+```
+
+**3. Delete by Branch Name**
+```bash
+wt delete feature/auth                    # Delete worktree checked out to branch "feature/auth"
+wt delete fix/login-bug                   # Delete by branch name (works with namespaced branches like fix/login-bug)
+```
+
+#### Options
 
 ```bash
-wt delete feature-auth                    # Delete with safety checks
-wt delete feature-auth --force            # Skip safety checks
-wt delete feature-auth --archive          # Archive before deleting
+wt delete [path] [options]
+
+Options:
+  -f, --force            Skip safety checks (dirty, unpushed, unmerged warnings)
+  -a, --archive          Archive worktree before deleting
+  --no-hooks             Skip pre/post-remove hooks
 ```
+
+#### Examples
+
+```bash
+# Interactive selection from list
+wt delete
+
+# Delete by folder name (with safety checks)
+wt delete feature-auth
+
+# Delete by branch name
+wt delete feature/auth
+
+# Force delete without confirmation prompts
+wt delete feature-auth --force
+
+# Archive before deleting
+wt delete feature-auth --archive
+
+# Delete without running hooks
+wt delete feature-auth --no-hooks
+
+# Combine options
+wt delete feature-auth --archive --force
+```
+
+#### How Branch vs Path Detection Works
+
+The command automatically determines whether your input is a **branch name** or **path**:
+
+| Input Pattern | Treated As | Example |
+|--------------|------------|---------|
+| Starts with `/`, `./`, `../`, or `~` | Path | `../feature-auth`, `/home/user/project` |
+| Contains `/` but matches common branch patterns (feature/, fix/, hotfix/, etc.) | Branch | `feature/auth`, `fix/login` |
+| Simple name without `/` | Branch | `main`, `develop` |
+| Folder-style names with `-` | Path | `feature-auth` → folder name |
+
+If the input matches a branch name, the worktree checked out to that branch will be deleted. If no branch match is found, it's treated as a path.
 
 ### `wt status [path]`
 

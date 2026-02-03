@@ -129,7 +129,7 @@ export async function validateWorktreePath(
     return {
       valid: false,
       error: `A worktree already exists at "${path}"`,
-      suggestion: 'Choose a different path or remove the existing worktree first with "wt delete <path>"',
+      suggestion: 'Choose a different path or remove the existing worktree first with "wt delete [path]"',
     };
   }
 

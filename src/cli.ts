@@ -36,8 +36,8 @@ export function cli(): void {
     .action(createCommand);
 
   program
-    .command('delete <path>')
-    .description('Remove a worktree')
+    .command('delete [path]')
+    .description('Remove a worktree by path or branch name (interactive if no argument)')
     .option('-f, --force', 'Skip safety checks')
     .option('-a, --archive', 'Archive before deleting')
     .option('--no-hooks', 'Skip pre/post-remove hooks')
