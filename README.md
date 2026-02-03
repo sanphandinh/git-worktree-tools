@@ -122,11 +122,26 @@ Create a `.wtconfig.json` file in your project root:
 }
 ```
 
+### Auto-Detection
+
+`wt` automatically detects certain configuration values from your repository:
+
+| Config | Auto-Detection | Priority |
+|--------|---------------|----------|
+| `defaultBranch` | Detected from `origin/HEAD` or falls back to checking for `main`/`master` branches | User config > Auto-detected > `"main"` |
+| `ignoreFiles` | Parsed from `.gitignore` if present | User config > Auto-detected > Default list |
+
+This means you often don't need to specify these values in your config file - `wt` will figure them out automatically.
+
+### Config File Locations
+
 Config is searched in this order:
 1. `.wtconfig.json` (project root)
 2. `.config/wtconfig.json`
 3. `~/.wtconfig.json` (global)
 4. `wtconfig` key in `package.json`
+
+**Priority order:** User config > Auto-detected values > Default values
 
 ## Commands
 

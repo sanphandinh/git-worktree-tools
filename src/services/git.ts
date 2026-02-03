@@ -108,6 +108,30 @@ export class GitService {
     }
   }
 
+  async getDefaultBranch(): Promise<string | null> {
+    try {
+      const originHead = await this.execGit(['symbolic-ref', 'refs/remotes/origin/HEAD']);
+      const match = originHead.trim().match(/refs\/remotes\/origin\/(.+)$/);
+      if (match) {
+        return match[1];
+      }
+    } catch {}
+
+    const candidates = ['main', 'master'];
+    for (const branch of candidates) {
+      const existsLocally = await this.branchExists(branch);
+      if (existsLocally) {
+        return branch;
+      }
+      try {
+        await this.execGit(['show-ref', '--verify', `refs/remotes/origin/${branch}`]);
+        return branch;
+      } catch {}
+    }
+
+    return null;
+  }
+
   async stash(path: string): Promise<void> {
     await this.execGit(['-C', path, 'stash', 'push', '-u', '-m', 'wt-auto-stash']);
   }
