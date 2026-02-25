@@ -1,7 +1,11 @@
+import { createRequire } from 'node:module';
 import type { WorktreeConfig } from './types/index.js';
 
+const require = createRequire(import.meta.url);
+const packageJson = require('../package.json') as { version?: string };
+
 export const PACKAGE_NAME = 'wt';
-export const VERSION = '0.1.0';
+export const VERSION = packageJson.version ?? '0.0.0';
 
 export const DEFAULT_CONFIG: WorktreeConfig = {
   defaultBranch: 'main',
