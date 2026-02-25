@@ -44,6 +44,13 @@ export interface CreateOptions {
   dryRun?: boolean;
 }
 
+export interface SetupOptions {
+  noInstall?: boolean;
+  noCopy?: boolean;
+  noHooks?: boolean;
+  dryRun?: boolean;
+}
+
 export interface DeleteOptions {
   force?: boolean;
   archive?: boolean;

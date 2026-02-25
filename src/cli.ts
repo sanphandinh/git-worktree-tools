@@ -7,6 +7,7 @@ import { statusCommand } from './commands/status.js';
 import { syncCommand } from './commands/sync.js';
 import { archiveCommand } from './commands/archive.js';
 import { initCommand } from './commands/init.js';
+import { setupCommand } from './commands/setup.js';
 
 export function cli(): void {
   const program = new Command();
@@ -35,6 +36,15 @@ export function cli(): void {
     .option('--no-hooks', 'Skip post-create hooks')
     .option('--dry-run', 'Show what would be done without executing')
     .action(createCommand);
+
+  program
+    .command('setup [path]')
+    .description('Run setup for an existing worktree by path or branch name')
+    .option('--no-install', 'Skip dependency installation')
+    .option('--no-copy', 'Skip environment file copying')
+    .option('--no-hooks', 'Skip post-create hooks')
+    .option('--dry-run', 'Show what would be done without executing')
+    .action(setupCommand);
 
   program
     .command('delete [path]')

@@ -3,8 +3,7 @@ import { mkdir } from 'fs/promises';
 import type { CreateOptions, CreateScenario, CreatePlan } from '../types/index.js';
 import { GitService } from '../services/git.js';
 import { loadConfig } from '../services/config.js';
-import { detectPackageManager, installDependencies } from '../services/package-manager.js';
-import { executeHooks, copyEnvFiles } from '../services/hooks.js';
+import { runWorktreeSetup } from '../services/setup.js';
 import { logger } from '../utils/logger.js';
 import { 
   pathExists, 
@@ -155,7 +154,7 @@ async function buildCreatePlan(
 /**
  * Show creation plan preview to user
  */
-function showPlanPreview(plan: CreatePlan, worktreePath: string, config: any): void {
+function showPlanPreview(plan: CreatePlan, worktreePath: string): void {
   console.log();
   console.log(chalk.cyan('Worktree Creation Plan:'));
   console.log(`  Folder: ${plan.folderName}`);
@@ -232,14 +231,14 @@ export async function createCommand(
   // Show dry run preview
   if (options.dryRun) {
     console.log(chalk.yellow('Dry run - would execute:'));
-    showPlanPreview(plan, worktreePath, config);
+    showPlanPreview(plan, worktreePath);
     console.log(chalk.yellow('  (No changes made - dry run mode)'));
     return;
   }
 
   // Show plan for user confirmation in interactive mode
   if (plan.scenario === 'neither' || plan.derivedFrom === 'prompt') {
-    showPlanPreview(plan, worktreePath, config);
+    showPlanPreview(plan, worktreePath);
   }
 
   // Create the worktree directory parent if needed
@@ -286,61 +285,34 @@ export async function createCommand(
 
   logger.success(`Worktree created: ${plan.branchName}`);
 
-  const warnings: string[] = [];
+  const setupResult = await runWorktreeSetup({
+    config,
+    sourcePath: rootPath,
+    worktreePath,
+    branch: plan.branchName,
+    mainPath: rootPath,
+    options: {
+      noInstall: options.noInstall,
+      noHooks: options.noHooks,
+    },
+    onProgress: (msg) => logger.info(msg),
+  });
 
-  // Install dependencies
-  if (!options.noInstall && config.autoInstall) {
-    const pm = await detectPackageManager(rootPath);
-    if (pm) {
-      const result = await installDependencies(worktreePath, pm, (msg) => {
-        logger.info(msg);
-      });
-      
-      if (result.success) {
-        logger.success(`Installed dependencies with ${pm.name}`);
-      } else {
-        warnings.push(result.error || 'Failed to install dependencies');
-        logger.warning('Dependency installation failed, but worktree was created');
-      }
-    }
+  if (setupResult.installedWith) {
+    logger.success(`Installed dependencies with ${setupResult.installedWith}`);
+  } else if (setupResult.installAttempted) {
+    logger.warning('Dependency installation failed, but worktree was created');
   }
 
-  // Copy env files
-  if (!options.noInstall && config.autoCopy) {
-    const result = await copyEnvFiles(rootPath, worktreePath, config, (msg) => {
-      logger.info(msg);
-    });
-    
-    if (result.copied.length > 0) {
-      logger.success(`Copied ${result.copied.length} files`);
-    }
-    
-    if (result.errors.length > 0) {
-      warnings.push(...result.errors);
-    }
+  if (setupResult.copiedFiles.length > 0) {
+    logger.success(`Copied ${setupResult.copiedFiles.length} files`);
   }
 
-  // Run hooks
-  if (!options.noHooks) {
-    const result = await executeHooks(
-      config,
-      'postCreate',
-      {
-        worktreePath,
-        branch: plan.branchName,
-        worktreeName: plan.folderName,
-        mainPath: rootPath,
-        createdAt: new Date().toISOString(),
-      },
-      (msg) => logger.info(msg)
-    );
-    
-    if (result.success) {
-      logger.success('Hooks executed');
-    } else {
-      warnings.push(...result.errors);
-    }
+  if (setupResult.hooksAttempted && setupResult.hooksSucceeded) {
+    logger.success('Hooks executed');
   }
+
+  const warnings = setupResult.warnings;
 
   // Final output
   console.log();

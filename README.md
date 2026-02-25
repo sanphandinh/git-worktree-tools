@@ -9,6 +9,7 @@ A simple but powerful CLI tool for managing git worktrees with AI agent collabor
 - **Simple CLI** - Clean, git-like interface
 - **Branch-Based Operations** - Reference worktrees by branch name (e.g., `wt status feature/auth`)
 - **Auto-Setup** - Automatically installs dependencies and copies env files
+- **Manual Setup Command** - Run setup again for an existing worktree with `wt setup`
 - **Package Manager Detection** - Supports npm, yarn, pnpm, and bun
 - **Lifecycle Hooks** - Run custom scripts on create/delete
 - **Branch Sync** - Keep worktrees up to date with base branch
@@ -81,6 +82,11 @@ wt create feature-auth --branch feature/auth
 
 # Create from a different base branch
 wt create -B develop
+
+# Run setup manually for an existing worktree
+wt setup feature-auth                 # By folder name
+wt setup feature/auth                 # By branch name
+wt setup                              # Current directory
 
 # Check detailed status (by folder or branch name)
 wt status feature-auth                # By folder name
@@ -275,6 +281,46 @@ $ wt create ../existing-worktree
 Suggestion: Choose a different path or remove the existing worktree first with "wt delete [path]"
 ```
 
+### `wt setup [path]`
+
+Run first-time setup tasks for an existing worktree (without creating one).
+
+This command uses the same setup flow as `wt create`:
+- install dependencies (based on lockfile detection)
+- copy configured files (like env files)
+- run `hooks.postCreate`
+
+```bash
+wt setup                              # Setup current directory
+wt setup feature-auth                 # Setup by folder name
+wt setup feature/auth                 # Setup by branch name
+```
+
+#### Options
+
+```bash
+wt setup [path] [options]
+
+Options:
+  --no-install             Skip dependency installation
+  --no-copy                Skip environment file copying
+  --no-hooks               Skip post-create hooks
+  --dry-run                Preview what would be done without executing
+```
+
+#### Examples
+
+```bash
+# Setup current worktree after manual git worktree add
+wt setup
+
+# Setup another worktree from main directory
+wt setup feature/auth
+
+# Copy env files and run hooks, but skip install
+wt setup feature-auth --no-install
+```
+
 ### `wt delete [path]`
 
 Remove a worktree safely. You can specify the worktree by **folder name**, **branch name**, or use **interactive mode** to select from a list.
@@ -349,7 +395,7 @@ The command automatically determines whether your input is a **branch name** or 
 
 If the input matches a branch name, the worktree checked out to that branch will be selected. If no branch match is found, it's treated as a path.
 
-> **Note:** This branch-vs-path detection pattern applies to all commands that accept a worktree identifier: `delete`, `status`, `sync`, and `archive`.
+> **Note:** This branch-vs-path detection pattern applies to all commands that accept a worktree identifier: `setup`, `delete`, `status`, `sync`, and `archive`.
 
 ### `wt init`
 

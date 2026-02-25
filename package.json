@@ -1,6 +1,6 @@
 {
   "name": "@sanphandinh/wtre",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "type": "module",
   "description": "Simple but powerful CLI for managing git worktrees with AI agent collaboration support",
   "main": "./dist/index.js",
